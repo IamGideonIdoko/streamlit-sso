@@ -16,6 +16,9 @@ if "token" not in st.session_state:
                 jwt_response = descope_client.sso.exchange_token(code)
             st.write("SSO Exchange successful")
             st.session_state["token"] = jwt_response["sessionToken"].get("jwt")
+            st.session_state["refresh_token"] = jwt_response["refreshSessionToken"].get(
+                "jwt"
+            )
             st.session_state["user"] = jwt_response["user"]
             st.rerun()
         except AuthException:
@@ -44,7 +47,10 @@ if "token" not in st.session_state:
 else:
     try:
         with st.spinner("Loading..."):
-            descope_client.validate_session(st.session_state.token)
+            jwt_response = descope_client.validate_and_refresh_session(
+                st.session_state.token, st.session_state.refresh_token
+            )
+            st.session_state["token"] = jwt_response["sessionToken"].get("jwt")
         st.title("Demo App")
         st.write("This is a demo app with Descope-powered authentication and SSO")
         st.subheader("Welcome! you're logged in")
