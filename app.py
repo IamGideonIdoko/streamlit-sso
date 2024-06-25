@@ -8,8 +8,11 @@ descope_client = DescopeClient(project_id=DESCOPE_PROJECT_ID)
 
 
 if "token" not in st.session_state:
+    # User is not logged in
     if "code" in st.query_params:
+        # Handle possible login
         code = st.query_params["code"]
+        # Reset URL state
         st.query_params.clear()
         try:
             # Exchange code
@@ -50,11 +53,13 @@ if "token" not in st.session_state:
                 unsafe_allow_html=True,
             )
 else:
+    # User is logged in
     try:
         with st.spinner("Loading..."):
             jwt_response = descope_client.validate_and_refresh_session(
                 st.session_state.token, st.session_state.refresh_token
             )
+            # Persist refreshed token
             st.session_state["token"] = jwt_response["sessionToken"].get("jwt")
         st.title("Demo App")
         st.write("This is a demo app with Descope-powered authentication and SSO")
@@ -64,8 +69,10 @@ else:
             st.write("Name: " + user["name"])
             st.write("Email: " + user["email"])
         if st.button("Logout"):
+            # Log out user
             del st.session_state.token
             st.rerun()
     except AuthException:
+        # Log out user
         del st.session_state.token
         st.rerun()
