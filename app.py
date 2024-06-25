@@ -66,8 +66,12 @@ else:
         st.subheader("Welcome! you're logged in")
         if "user" in st.session_state:
             user = st.session_state.user
+            print("User: ", user)
             st.write("Name: " + user["name"])
             st.write("Email: " + user["email"])
+            if "Tenant Admin" in user["roleNames"]:
+                # Show admin-specific content
+                st.success("ADMIN", icon="🤖")
         if st.button("Logout"):
             # Log out user
             del st.session_state.token
